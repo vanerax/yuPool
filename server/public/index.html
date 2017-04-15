@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style type="text/css">
+    .form-control {
+      width: 100%;
+    }
+
+    .text-area {
+      height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <select id="room_name" class="form-control">
+      <option value ="nvliu">nvliu</option>
+      <option value ="fengtimo">fengtimo</option>
+      <option value="xiaoqingmiao">xiaoqingmiao</option>
+      <option value="chenyifa">chenyifa</option>
+    </select>
+  </div>
+  <div>
+    <textarea id="message_area" class="form-control text-area" placeholder="input token..."></textarea>
+  </div>
+  <button id="ok_button" class="form-control">Send</button>
+  
+  <div>
+    <div>Response: </div>
+    <div id="response"></div>
+  </div>
+  <div>
+    <div>Receive Message: </div>
+    <div id="recv_message">
+    </div>
+  </div>
+
+
+  <script type="text/javascript">
+    function broadcast(sRoomName, sData) {
+      var path = "/api/" + sRoomName;
+      var xmlhttp = new XMLHttpRequest();
+      xmlhttp.onreadystatechange = function(){
+        if (this.readyState==4)
+        {
+          // this.status==200
+          //console.log(this);
+          //console.log(arguments);
+          var s = "<p>" + this.status + "|" + this.statusText + "</p>" +
+                  "<p>" + this.responseText + "</p>";
+
+          document.getElementById("response").innerHTML = s;
+        }
+      };
+      //xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      xmlhttp.open("POST", path, true);
+      xmlhttp.send(sData);
+    }
+
+    function parseToken(s){
+      if (-1 === s.indexOf('\n')) {
+        return s;
+      }
+
+      var aToken = s.split('\n');
+      var sToken = aToken.map(function(line){
+        var aColumn = line.split(':');
+        return aColumn[0].trim() + '=' + aColumn[1].trim();
+      }).join('&');
+      return sToken;
+      // tt:24869738
+      // cdn:ws
+      // rate:2
+      // did:9C9B29EE0C9EA895F06C92FDADC800ED
+      // sign:a154d5b630054a9c0d118bb6d9097c23
+      // ver:2017041401
+    }
+
+    window.onload = function() {
+      var elButton = document.getElementById("ok_button");
+      var elMessageArea = document.getElementById("message_area");
+      var elRoomName = document.getElementById("room_name");
+      elButton.addEventListener('click', function(){
+        broadcast(elRoomName.value, elMessageArea.value);
+        //alert(elRoomName.value);
+      });
+    };
+  </script>
+</body>
+</html>
