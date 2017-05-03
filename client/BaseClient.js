@@ -15,8 +15,8 @@ BaseClient.prototype.run = function() {
     console.log('run');
     
     var self = this;
-    var sServiceUrl = "http://localhost:3000/api/";
-    var oUrl = url.parse(sServiceUrl + this.sName);
+    var sServiceUrl = "http://localhost:3000/api/_all";
+    var oUrl = url.parse(sServiceUrl); // + this.sName);
     var oOption = {
         hostname: oUrl.hostname,
         port: oUrl.port,

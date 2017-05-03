@@ -1,6 +1,6 @@
 const express = require('express');
 const Client = require('./Client');
-const roomManger = require('./RoomManager');
+const roomManager = require('./RoomManager');
 
 var PARAM_NAME = "name";
 
@@ -31,7 +31,7 @@ function fGetHandler(req, res) {
     var roomName = req.params[PARAM_NAME];
     console.log(`>> one client joined to ${roomName}`);
     var client = Client.create(req, res);
-    roomManger.join(client, roomName);
+    roomManager.join(client, roomName);
 }
 
 function fPostHandler(req, res) {
@@ -41,12 +41,12 @@ function fPostHandler(req, res) {
 
     function broadcast(data){
         // pop all clients
-        var oClient = roomManger.popClient(roomName);
+        var oClient = roomManager.popClient(roomName);
         while (oClient) {
             console.log('client!');
             oClient.response.send(data);
 
-            oClient = roomManger.popClient(roomName);
+            oClient = roomManager.popClient(roomName);
         }
     }
 

@@ -9,16 +9,40 @@
     .text-area {
       height: 60px;
     }
+
+    .flex {
+      display: flex;
+      /*box-sizing: border-box;*/
+    }
+
+    .flex > div {
+      flex-basis: 30%;
+      margin-right: 5px;
+    }
+
+    #room_name {
+      
+    }
+
+    #custom_name {
+
+    }
   </style>
 </head>
 <body>
-  <div>
-    <select id="room_name" class="form-control">
-      <option value ="nvliu">nvliu</option>
-      <option value ="fengtimo">fengtimo</option>
-      <option value="xiaoqingmiao">xiaoqingmiao</option>
-      <option value="chenyifa">chenyifa</option>
-    </select>
+  <div class="flex">
+    <div>
+      <select id="room_name" class="form-control">
+        <option value ="126733">nvliu | 女流</option>
+        <option value ="fengtimo">fengtimo | 冯提莫</option>
+        <option value="xiaoqingmiao">xiaoqingmiao | 小青喵</option>
+        <option value="chenyifa">chenyifa | 陈一发</option>
+        <option value="155377">155377 | 夏天蓝海</option>
+      </select>
+    </div>
+    <div>
+      <input id="custom_name" class="form-control" type="text" placeholder="custom room id" />
+    </div>
   </div>
   <div>
     <textarea id="message_area" class="form-control text-area" placeholder="input token..."></textarea>
@@ -37,8 +61,8 @@
 
 
   <script type="text/javascript">
-    function broadcast(sRoomName, sData) {
-      var path = "/api/" + sRoomName;
+    function broadcast(oData) {
+      var path = "/api/_all";
       var xmlhttp = new XMLHttpRequest();
       xmlhttp.onreadystatechange = function(){
         if (this.readyState==4)
@@ -52,9 +76,11 @@
           document.getElementById("response").innerHTML = s;
         }
       };
-      //xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      
       xmlhttp.open("POST", path, true);
-      xmlhttp.send(sData);
+      //xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      xmlhttp.setRequestHeader("Content-type","application/json");
+      xmlhttp.send(JSON.stringify(oData));
     }
 
     function parseToken(s){
@@ -80,9 +106,14 @@
       var elButton = document.getElementById("ok_button");
       var elMessageArea = document.getElementById("message_area");
       var elRoomName = document.getElementById("room_name");
+      var elCustomRoomName = document.getElementById("custom_name");
+
       elButton.addEventListener('click', function(){
-        broadcast(elRoomName.value, elMessageArea.value);
-        //alert(elRoomName.value);
+        var oData = {
+          roomId: elCustomRoomName.value != "" ? elCustomRoomName.value : elRoomName.value,
+          body: parseToken(elMessageArea.value)
+        };
+        broadcast(oData);
       });
     };
   </script>

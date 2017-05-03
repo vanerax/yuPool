@@ -17,6 +17,9 @@ RoomManager.prototype.popClient = function(roomId) {
     if (oRooms[roomId]) {
         client = oRooms[roomId].popClient();
     }
+    if (null == client && oRooms["_all"]) {
+    	client = oRooms["_all"].popClient();
+    }
     return client;
 };
 
