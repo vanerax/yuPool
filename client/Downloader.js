@@ -8,7 +8,17 @@ function Downloader() {
 
 }
 
-Downloader.prototype.run = function(sUrl, sFullPathName) {
+Downloader.prototype.onCompleted = function() {
+
+};
+
+Downloader.prototype.run = function(sUrl, sFileName, fOnCompleted) {
+    var self = this;
+
+    if (fOnCompleted) {
+        this.onCompleted = fOnCompleted;
+    }
+
 	var oUrl = url.parse(sUrl);
     var oOption = {
         hostname: oUrl.hostname,
@@ -20,7 +30,10 @@ Downloader.prototype.run = function(sUrl, sFullPathName) {
 
     http.request(oOption, function(res){
         //assert.ok(res instanceof http.IncomingMessage, "IncomingMessage");
-        var fd = fs.openSync(_generateFullPathName(), "w");
+        if (!sFileName) {
+            sFileName = _generateFullPathName();
+        }
+        var fd = fs.openSync(sFileName, "w");
         let aPool = [];
         let nSize = 0;
         let nTotalSize = 0;
@@ -29,15 +42,15 @@ Downloader.prototype.run = function(sUrl, sFullPathName) {
         	nSize += chunk.length;
         	nTotalSize += chunk.length;
         	aPool.push(chunk);
-        	console.log(".");
+        	//console.log(".");
 
-        	fs.writeSync(fd, "start\n");
+        	//fs.writeSync(fd, "start\n");
         	if (nSize > 1024 * 1024) {
         		var buff = Buffer.concat(aPool);
         		fs.writeSync(fd, buff, 0, buff.length);
         		aPool = [];
         		nSize = 0;
-        		console.log(`total size: ${nTotalSize}`);
+        		//console.log(`total size: ${nTotalSize}`);
         	}
         });
         res.on('end', function(){
@@ -45,6 +58,9 @@ Downloader.prototype.run = function(sUrl, sFullPathName) {
             //console.log(buff);
         	fs.writeSync(fd, buff, 0, buff.length);
             fs.close(fd);
+            if (typeof self.onCompleted == 'function') {
+                self.onCompleted();
+            }
         });
     }).end(); // return <http.ClientRequest>
 };
@@ -55,7 +71,11 @@ function _generateFullPathName() {
 	return filename;
 }
 
+
+Downloader.run = function(sUrl, sFileName, fOnCompleted) {
+    var d = new Downloader();
+    d.run(sUrl, sFileName, fOnCompleted);
+}
+
 module.exports = Downloader;
 
-var d = new Downloader();
-d.run("http://www.baidu.com/");
