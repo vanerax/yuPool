@@ -1,5 +1,6 @@
 const url = require('url');
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const BASE_PATH = "e:\\temp";
 
@@ -20,6 +21,7 @@ Downloader.prototype.run = function(sUrl, sFileName, fOnCompleted) {
     }
 
 	var oUrl = url.parse(sUrl);
+
     var oOption = {
         hostname: oUrl.hostname,
         //port: 80,
@@ -34,6 +36,7 @@ Downloader.prototype.run = function(sUrl, sFileName, fOnCompleted) {
             sFileName = _generateFullPathName();
         }
         var fd = fs.openSync(sFileName, "w");
+
         let aPool = [];
         let nSize = 0;
         let nTotalSize = 0;
@@ -56,7 +59,7 @@ Downloader.prototype.run = function(sUrl, sFileName, fOnCompleted) {
         res.on('end', function(){
             var buff = Buffer.concat(aPool);
             //console.log(buff);
-        	fs.writeSync(fd, buff, 0, buff.length);
+            fs.writeSync(fd, buff, 0, buff.length);
             fs.close(fd);
             if (typeof self.onCompleted == 'function') {
                 self.onCompleted();
@@ -65,10 +68,30 @@ Downloader.prototype.run = function(sUrl, sFileName, fOnCompleted) {
     }).end(); // return <http.ClientRequest>
 };
 
+Downloader.prototype.runWriteStream = function(sUrl, oWriteStream) {
+    var oUrl = url.parse(sUrl);
+    var oOption = {
+        hostname: oUrl.hostname,
+        //port: 80,
+        path: oUrl.path,
+        method: 'GET',
+        headers: {}
+    };
+
+    https.request(oOption, function(res){
+        //assert.ok(res instanceof http.IncomingMessage, "IncomingMessage");
+        let aPool = [];
+        let nSize = 0;
+        let nTotalSize = 0;
+        res.pipe(oWriteStream);
+
+    }).end(); // return <http.ClientRequest>
+};
+
 function _generateFullPathName() {
-	var ts = Math.floor(new Date().getTime() / 1000);
-	var filename = BASE_PATH + "\\" + ts + ".flv";
-	return filename;
+    var ts = Math.floor(new Date().getTime() / 1000);
+    var filename = BASE_PATH + "\\" + ts + ".flv";
+    return filename;
 }
 
 
@@ -78,4 +101,9 @@ Downloader.run = function(sUrl, sFileName, fOnCompleted) {
 }
 
 module.exports = Downloader;
+
+var fws = fs.createWriteStream('r:\\z2.txt');
+var d = new Downloader();
+
+d.runWriteStream("https://bing.com/", fws);
 
