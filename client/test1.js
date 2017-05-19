@@ -3,6 +3,7 @@ const SMPlayer = require('./SMPlayer');
 const constant = require('../common/constant');
 const fs =require('fs');
 const Writable = require('stream').Writable;
+const Downloader = require('./Downloader');
 
 class MyWritable extends Writable {
   constructor(options) {
@@ -18,46 +19,8 @@ class MyWritable extends Writable {
   }
 }
 
-var mw = new MyWritable();
-console.log(MyWritable);
 
-mw.write("hello world", function(){
-    console.log('written for my writeable');
-    console.log(arguments);
-});
+var url = "https://www.baidu.com/";
+var ws = fs.createWriteStream('r:\\z.txt', { highWaterMark: 64 * 1024 });
+Downloader.runWriteStream(url, ws);
 
-var ws = new fs.createWriteStream('z.txt');
-ws.on('open', function(){
-    console.log('open');
-    console.log(arguments);
-});
-ws.on('close', function(){
-    console.log('close');
-    console.log(arguments);
-});
-
-ws.on('finish', function(){
-    console.log('finish');
-    console.log(arguments);
-});
-
-ws.on('error', function(){
-    console.log('error');
-    console.log(arguments);
-});
-
-var bRet = ws.write("test1", function(){
-    console.log('written1');
-    console.log(arguments);
-});
-console.log(bRet);
-
-bRet = ws.write("test2", function(){
-    console.log('written2');
-    console.log(arguments);
-});
-console.log(bRet);
-
-//process.stdin.pipe(ws);
-
-ws.end();

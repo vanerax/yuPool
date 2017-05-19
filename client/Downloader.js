@@ -68,7 +68,58 @@ Downloader.prototype.run = function(sUrl, sFileName, fOnCompleted) {
     }).end(); // return <http.ClientRequest>
 };
 
-Downloader.prototype.runWriteStream = function(sUrl, oWriteStream) {
+Downloader.prototype.runWriteStream = function(sUrl, oWriteStream, fComplete) {
+    var oUrl = url.parse(sUrl);
+    var oOption = {
+        hostname: oUrl.hostname,
+        //port: 80,
+        path: oUrl.path,
+        method: 'GET',
+        headers: {}
+    };
+
+    var oHttp;
+    if ("http:" == oUrl.protocol) {
+        oHttp = http;
+    } else if ("https:" == oUrl.protocol) {
+        oHttp = https;
+    } else {
+        throw "protocol not supported";
+    }
+    
+    oHttp.request(oOption, function(res){
+        //assert.ok(res instanceof http.IncomingMessage, "IncomingMessage");
+
+        let nSize = 0;
+        let nTotalSize = 0;
+
+        res.on('data', function(chunk){
+            nSize += chunk.length;
+            nTotalSize += chunk.length;
+            if (nSize > 1024 * 1024) {
+                // console.log(".");
+                console.log(nTotalSize);
+                nSize -= 1024 * 1024;
+            }
+            if (false === oWriteStream.write(chunk)) {
+                res.pause();
+            }
+        });
+
+        res.on('end', function(){
+            if (typeof fComplete == 'function') {
+                fComplete();
+            }
+        });
+
+        oWriteStream.on('drain', function() {
+            res.resume();
+        });
+
+    }).end(); // return <http.ClientRequest>
+};
+
+Downloader.prototype.runPipeStream = function(sUrl, oWriteStream) {
     var oUrl = url.parse(sUrl);
     var oOption = {
         hostname: oUrl.hostname,
@@ -94,16 +145,21 @@ function _generateFullPathName() {
     return filename;
 }
 
+function _formatSize(n) {
 
-Downloader.run = function(sUrl, sFileName, fOnCompleted) {
-    var d = new Downloader();
-    d.run(sUrl, sFileName, fOnCompleted);
 }
+
+Downloader.run = function(sUrl, sFileName, fOnComplete) {
+    var d = new Downloader();
+    d.run(sUrl, sFileName, fOnComplete);
+};
+
+Downloader.runWriteStream = function(sUrl, oWriteStream, fOnComplete) {
+    var d = new Downloader();
+    d.runWriteStream(sUrl, oWriteStream, fOnComplete);
+};
 
 module.exports = Downloader;
 
-var fws = fs.createWriteStream('r:\\z2.txt');
-var d = new Downloader();
 
-d.runWriteStream("https://bing.com/", fws);
 
