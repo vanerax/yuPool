@@ -7,7 +7,7 @@ const DANMU_AUTH_PORT = 8088;
 const crypto = require('crypto');
 const net = require('net');
 const assert = require('assert');
-
+const model = require('./danmu/model');
 
 var roomId = 2089340;
 
@@ -174,9 +174,20 @@ function login() {
     oDanmuClient.write(data);
 }
 // type@=joingroup/rid@=****/gid@=-9999/
+// function joinGroup() {
+//     //type@=loginreq/roomid@=****/
+//     var sMessage = "type@=joingroup/rid@=" + roomId + "/gid@=" + groupId + "/";
+//     var data = Message.create(sMessage);
+//     oDanmuClient.write(data);
+// }
+
 function joinGroup() {
-    //type@=loginreq/roomid@=****/
-    var sMessage = "type@=joingroup/rid@=" + roomId + "/gid@=" + groupId + "/";
+    var oMsg = {
+        type: "joingroup",
+        rid: roomId,
+        gid: groupId
+    };
+    model.Message.generate(oMsg);
     var data = Message.create(sMessage);
     oDanmuClient.write(data);
 }
