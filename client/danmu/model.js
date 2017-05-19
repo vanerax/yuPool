@@ -25,7 +25,10 @@ Message.generate = function(obj) {
     var aMsg = [];
     for (var e in obj) {
         var key = e.replace('/', '@S').replace('@', '@A');
-        var val = obj[e].replace('/', '@S').replace('@', '@A');
+        var val = obj[e];
+        if (typeof val == 'string') {
+            val = val.replace('/', '@S').replace('@', '@A');
+        }
         aMsg.push(key + "@=" + val + "/");
     }
     return aMsg.join('');

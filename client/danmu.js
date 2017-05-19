@@ -9,7 +9,7 @@ const net = require('net');
 const assert = require('assert');
 const model = require('./danmu/model');
 
-var roomId = 2089340;
+var roomId = 610588;
 
 function f1() {
 var options = {
@@ -141,8 +141,8 @@ var oDanmuClient = net.connect(options, function() {
 
 oDanmuClient.on('data', function(data){
     var sData = extractData(data);
-    //console.log("on data:");
-    //console.log(data);
+    // console.log("on data:");
+    // console.log(data);
 
     var oMessage = Message.parse(sData);
     if (oMessage.type == 'loginres') {
@@ -171,23 +171,14 @@ oDanmuClient.on('end', function(){
 function login() {
     var sMessage = "type@=loginreq/username@=visitor1234567/password@=1234567890123456/roomid@=" + roomId + "/";
     var data = Message.create(sMessage);
+    console.log("on send data:");
+    console.log(data);
     oDanmuClient.write(data);
 }
 // type@=joingroup/rid@=****/gid@=-9999/
-// function joinGroup() {
-//     //type@=loginreq/roomid@=****/
-//     var sMessage = "type@=joingroup/rid@=" + roomId + "/gid@=" + groupId + "/";
-//     var data = Message.create(sMessage);
-//     oDanmuClient.write(data);
-// }
-
 function joinGroup() {
-    var oMsg = {
-        type: "joingroup",
-        rid: roomId,
-        gid: groupId
-    };
-    model.Message.generate(oMsg);
+    //type@=loginreq/roomid@=****/
+    var sMessage = "type@=joingroup/rid@=" + roomId + "/gid@=" + groupId + "/";
     var data = Message.create(sMessage);
     oDanmuClient.write(data);
 }

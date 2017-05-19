@@ -1,5 +1,7 @@
 const EventEmitter = require('events');
 
+const MAX_BUFFER_LEN = 1024 * 1024;
+
 function DanmuPayload() {
     this._eventEmitter = new EventEmitter();
     this._aBuffer = [];
@@ -20,15 +22,25 @@ DanmuPayload.prototype.shift = function() {
     } else if (this._aBuffer.length === 1){
         tmpBuffer = this._aBuffer[0];
     }
-    
-    if (tmpBuffer.length = 4 + 8 + 1) {
+
+    if (tmpBuffer > MAX_BUFFER_LEN) {
+        throw new Error("buffer size excceeds the maxmium threshold");
+    }
+
+    if (tmpBuffer.length >= 4 + 8 + 1) {
         var nLen = tmpBuffer.readInt32LE();
-        if (tmpBuffer.length = 4 + nLen) {
+        if (tmpBuffer.length >= 4 + nLen) {
             var content = tmpBuffer.slice(4 + 8, 4 + nLen - 1);
+
             ret = content.toString();
 
-            var newBuffer = tmpBuffer.slice(4 + nLen);
-            this._aBuffer = [ newBuffer ];
+            if (tmpBuffer.length > 4 + nLen) {
+                var newBuffer = tmpBuffer.slice(4 + nLen);
+                this._aBuffer = [ newBuffer ];
+            } else {
+                this._aBuffer = [];
+            }
+            
 
         } else {
             // no enough data filled
@@ -49,6 +61,10 @@ DanmuPayload.prototype.shiftAll = function() {
         aRet.push(content);
         content = this.shift();
     }
+    if (aRet.length > 1) {
+        console.log(`>> multiple messages contained! `);
+        console.log(aRet);
+    }
 
     return aRet;
 };
@@ -58,3 +74,4 @@ DanmuPayload.prototype.push = function(chunk) {
 };
 
 module.exports = DanmuPayload;
+

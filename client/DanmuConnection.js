@@ -12,7 +12,10 @@ const DANMU_PORT_3PARTY = 8601;
 const DANMU_AUTH_ADDRESS = "119.90.49.88";
 const DANMU_AUTH_PORT = 8088;
 const HEARTBEAT_INTERVAL = 45;
+const DEFAULT_GROUP_ID = -9999;
 
+var username = "visitor1234567";
+var password = "1234567890123456";
 
 function DanmuConnection() {}
 
@@ -20,40 +23,45 @@ function DanmuSocket(socket, roomId, groupId) {
     var self = this;
     this._socket = socket;
     this._roomId = roomId;
-    this._groupId = groupId;
+    this._groupId = groupId != undefined ? groupId : DEFAULT_GROUP_ID;
     this._eventEmitter = new EventEmitter();
     this._heartbeat = new DanmuHeartbeat(this._socket);
     this._danmuPayload = new DanmuPayload();
 
     this._socket.on('connect', function() {
-        self._login();
+        console.log(`login room: ${self._roomId}`);
+        self._login(username, password, self._roomId);
     });
 
     this._socket.on('data', function(chunk) {
+        //console.log('on data');
+        //console.log(chunk);
         //var aMsg = model.Payload.parse(chunk);
-        this._danmuPayload.push(chunk);
-        var aMsg = this._danmuPayload.shiftAll();
+        self._danmuPayload.push(chunk);
+        var aMsg = self._danmuPayload.shiftAll();
 
         aMsg.forEach(function(sMsg){
             var oMsg = model.Message.parse(sMsg);
-            this.eventEmmiter.emit('data', oMsg);
+            self._eventEmitter.emit('data', oMsg);
+            //console.log('>> ', oMsg);
             // translate message
-            this._translateMessage(oMsg);
+            self._translateMessage(oMsg);
         });
         
     });
 
     this._socket.on('end', function(){
-        this.eventEmmiter.emit('end');
+        self.eventEmmiter.emit('end');
         console.log('disconnected from server');
-        this._socket.end();
+        self._socket.end();
     });
 }
 
 DanmuSocket.prototype.end = function() {};
 
 DanmuSocket.prototype.write = function(sMsg) {
-    var bufPayload = model.Payload.generate(sMgs);
+    var bufPayload = model.Payload.generate(sMsg);
+    //console.log(bufPayload);
     this._socket.write(bufPayload);
 };
 
@@ -65,6 +73,8 @@ DanmuSocket.prototype._translateMessage = function(oMsg) {
 
     switch (oMsg.type) {
     case 'loginres':
+        console.log('>> ', oMsg);
+        console.log(`join group: ${this._groupId}`);
         this._joinGroup(this._roomId, this._groupId);
         this._heartbeat.start();
         break;
@@ -122,8 +132,8 @@ DanmuSocket.prototype._login = function(usr, pwd, roomId) {
     //var sMessage = "type@=loginreq/username@=visitor1234567/password@=1234567890123456/roomid@=" + roomId + "/";
     var oMsg = {
         type: "loginreq",
-        username: "visitor1234567",
-        password: "1234567890123456",
+        username: usr,
+        password: pwd,
         roomid: roomId
     };
     var sMsg = model.Message.generate(oMsg);
@@ -146,18 +156,14 @@ function DanmuHeartbeat(danmuSocket) {
 }
 
 DanmuHeartbeat.prototype.start = function() {
+    var self = this;
     if (this._heartbeatHandler == null) {
         this._heartbeatHandler = setInterval(function(){
-            var now = Math.floor(new Date().getTime() / 1000);
-            var oMsg = {
-                type: "keeplive",
-                tick: now
-            };
-            this._danmuSocket.write(model.generate(oMsg));
-            console.log("send heartbeat...");
+            self._sendHeartbeat();
         }, HEARTBEAT_INTERVAL * 1000);
     }
 };
+
 DanmuHeartbeat.prototype.stop = function() {
     if (this._heartbeatHandler) {
         removeInterval(this._heartbeatHandler);
@@ -165,12 +171,30 @@ DanmuHeartbeat.prototype.stop = function() {
     }
 };
 
+DanmuHeartbeat.prototype._sendHeartbeat = function(){
+    var now = Math.floor(new Date().getTime() / 1000);
+    var oMsg = {
+        type: "keeplive",
+        tick: now
+    };
+    this._danmuSocket.write(model.Message.generate(oMsg));
+    console.log("send heartbeat...");
+}
+
 DanmuConnection.connect = function(options) {
     if (options.roomId == null) {
         throw new Error("roomId not specified");
     }
     if (options.groupId == null) {
-        throw new Error("groupId not specified");
+        //throw new Error("groupId not specified");
+        groupId = DEFAULT_GROUP_ID;
+    }
+
+    if (options.host == null) {
+        options.host = DANMU_ADDRESS_3PARTY;
+    }
+    if (options.port == null) {
+        options.port = DANMU_PORT_3PARTY;
     }
 
     var socket = net.connect(options);
