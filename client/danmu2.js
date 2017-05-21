@@ -7,7 +7,7 @@ const DanmuConnection = require('./DanmuConnection');
 var options = {
 	//host: 'danmu.douyutv.com',
 	//port: 8602,
-	roomId: 610588 //2089340
+	roomId: 156277 // 2089340
 };
 
 var danmuSocket = DanmuConnection.connect(options);

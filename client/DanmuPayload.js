@@ -1,11 +1,13 @@
+const util = require('util');
 const EventEmitter = require('events');
 
 const MAX_BUFFER_LEN = 1024 * 1024;
 
 function DanmuPayload() {
-    this._eventEmitter = new EventEmitter();
+    //this._eventEmitter = new EventEmitter();
     this._aBuffer = [];
 }
+util.inherits(DanmuPayload, EventEmitter);
 
 // shift one message from payload
 // @return {String}. return null if not available
@@ -61,16 +63,32 @@ DanmuPayload.prototype.shiftAll = function() {
         aRet.push(content);
         content = this.shift();
     }
+    // start of DEBUG
     if (aRet.length > 1) {
         console.log(`>> multiple messages contained! `);
         console.log(aRet);
     }
+    // end of DEBUG
 
     return aRet;
 };
 
 DanmuPayload.prototype.push = function(chunk) {
     this._aBuffer.push(chunk);
+
+    var count = 0;
+    var content = this.shift();
+    while (content) {
+        this.emit('data', content);
+        count++;
+        content = this.shift();
+    }
+    // start of DEBUG
+    if (count > 1) {
+        console.log(`>> multiple messages contained! `);
+        //console.log(count);
+    }
+    // end of DEBUG
 };
 
 module.exports = DanmuPayload;

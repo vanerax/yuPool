@@ -2,7 +2,7 @@ const Downloader = require('./Downloader');
 const fs = require('fs');
 
 
-var sRawUrl = "http://videows1.douyucdn.cn/live/normal_643129820170517110750-upload-8c4c/playlist.m3u8?k=29f1e97c83a47e008be2426b365aa425&t=591dbccf&u=70806189&ct=web&vid=658098&d=9C9B29EE0C9EA895F06C92FDADC800ED";
+var sRawUrl = "http://videows1.douyucdn.cn/live/normal_643129820170503162243-upload-8473/playlist.m3u8?k=e5bf91f2be48617d9de5c0b5e3d5d72e&t=5921054c&u=70806189&ct=web&vid=594648&d=9C9B29EE0C9EA895F06C92FDADC800ED";
 var sBaseUrl = "";
 var sPlayList = "";
 var sBasePath = "E:\\temp\\dyReplay\\";

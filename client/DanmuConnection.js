@@ -28,6 +28,14 @@ function DanmuSocket(socket, roomId, groupId) {
     this._heartbeat = new DanmuHeartbeat(this._socket);
     this._danmuPayload = new DanmuPayload();
 
+    this._danmuPayload.on('data', function(sMsg){
+        var oMsg = model.Message.parse(sMsg);
+        self._eventEmitter.emit('data', oMsg);
+        // console.log('>> ', oMsg);
+        // translate message
+        self._translateMessage(oMsg);
+    });
+
     this._socket.on('connect', function() {
         console.log(`login room: ${self._roomId}`);
         self._login(username, password, self._roomId);
@@ -38,15 +46,15 @@ function DanmuSocket(socket, roomId, groupId) {
         //console.log(chunk);
         //var aMsg = model.Payload.parse(chunk);
         self._danmuPayload.push(chunk);
-        var aMsg = self._danmuPayload.shiftAll();
+        // var aMsg = self._danmuPayload.shiftAll();
 
-        aMsg.forEach(function(sMsg){
-            var oMsg = model.Message.parse(sMsg);
-            self._eventEmitter.emit('data', oMsg);
-            //console.log('>> ', oMsg);
-            // translate message
-            self._translateMessage(oMsg);
-        });
+        // aMsg.forEach(function(sMsg){
+        //     var oMsg = model.Message.parse(sMsg);
+        //     self._eventEmitter.emit('data', oMsg);
+        //     //console.log('>> ', oMsg);
+        //     // translate message
+        //     self._translateMessage(oMsg);
+        // });
         
     });
 
@@ -54,6 +62,10 @@ function DanmuSocket(socket, roomId, groupId) {
         self.eventEmmiter.emit('end');
         console.log('disconnected from server');
         self._socket.end();
+    });
+
+    this._socket.on('error', function(){
+        throw new Error(arguments);
     });
 }
 
@@ -66,7 +78,6 @@ DanmuSocket.prototype.write = function(sMsg) {
 };
 
 DanmuSocket.prototype._translateMessage = function(oMsg) {
-    // TODO
     if (oMsg.type && oMsg.type.length > 0) {
         this._eventEmitter.emit(oMsg.type, oMsg);
     }
@@ -138,7 +149,7 @@ DanmuSocket.prototype._login = function(usr, pwd, roomId) {
     };
     var sMsg = model.Message.generate(oMsg);
     this.write(sMsg);
-}
+};
 
 DanmuSocket.prototype._joinGroup = function(roomId, groupId) {
     var oMsg = {
@@ -148,12 +159,12 @@ DanmuSocket.prototype._joinGroup = function(roomId, groupId) {
     };
     var sMsg = model.Message.generate(oMsg);
     this.write(sMsg);
-}
+};
 
 function DanmuHeartbeat(danmuSocket) {
     this._danmuSocket = danmuSocket;
     this._heartbeatHandler = null;
-}
+};
 
 DanmuHeartbeat.prototype.start = function() {
     var self = this;
@@ -177,9 +188,11 @@ DanmuHeartbeat.prototype._sendHeartbeat = function(){
         type: "keeplive",
         tick: now
     };
+
     this._danmuSocket.write(model.Message.generate(oMsg));
     console.log("send heartbeat...");
-}
+    console.log(model.Message.generate(oMsg));
+};
 
 DanmuConnection.connect = function(options) {
     if (options.roomId == null) {
