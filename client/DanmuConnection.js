@@ -25,7 +25,7 @@ function DanmuSocket(socket, roomId, groupId) {
     this._roomId = roomId;
     this._groupId = groupId != undefined ? groupId : DEFAULT_GROUP_ID;
     this._eventEmitter = new EventEmitter();
-    this._heartbeat = new DanmuHeartbeat(this._socket);
+    this._heartbeat = new DanmuHeartbeat(this);
     this._danmuPayload = new DanmuPayload();
 
     this._danmuPayload.on('data', function(sMsg){
@@ -135,6 +135,9 @@ DanmuSocket.prototype._translateMessage = function(oMsg) {
         // top 10 rank up 
         break;
 
+    case 'keeplive':
+        //console.log("keeplive", oMsg);
+        break;
     }
 };
 
@@ -191,7 +194,7 @@ DanmuHeartbeat.prototype._sendHeartbeat = function(){
 
     this._danmuSocket.write(model.Message.generate(oMsg));
     console.log("send heartbeat...");
-    console.log(model.Message.generate(oMsg));
+    //console.log(model.Message.generate(oMsg));
 };
 
 DanmuConnection.connect = function(options) {

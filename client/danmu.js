@@ -156,6 +156,8 @@ oDanmuClient.on('data', function(data){
         //console.log('chatmsg:');
         //console.log(oMessage);
         console.log(`${oMessage.nn}: ${oMessage.txt}`);
+    } else if (oMessage.type == 'keeplive') {
+        console.log(`keeplive | ${oMessage.toString()}`);
     } else {
         //console.log('other message: <' + oMessage.type + '>');
     }
