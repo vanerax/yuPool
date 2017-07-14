@@ -5,9 +5,9 @@ const assert = require('assert');
 var douyu = {};
 
 /*
- * param sRoomId
- * param oPayload
- * param fCallback(rawData)
+ * @param sRoomId
+ * @param oPayload
+ * @param fCallback(sUrl)
  */
 function getPlay(sRoomId, oPayload, fCallback) {
     var sUrl = "http://www.douyu.com/lapi/live/getPlay/" + sRoomId;

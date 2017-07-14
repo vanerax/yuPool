@@ -59,7 +59,7 @@ function DanmuSocket(socket, roomId, groupId) {
     });
 
     this._socket.on('end', function(){
-        self.eventEmmiter.emit('end');
+        self._eventEmmiter.emit('end');
         console.log('disconnected from server');
         self._socket.end();
     });

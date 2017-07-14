@@ -84,10 +84,10 @@ DanmuPayload.prototype.push = function(chunk) {
         content = this.shift();
     }
     // start of DEBUG
-    if (count > 1) {
-        console.log(`>> multiple messages contained! `);
+    //if (count > 1) {
+        //console.log(`>> multiple messages contained! `);
         //console.log(count);
-    }
+    //}
     // end of DEBUG
 };
 

@@ -10,6 +10,10 @@ var options = {
 	roomId: 156277 // 2089340
 };
 
+if (process.argv.length >= 3) {
+	options.roomId = process.argv[2];
+	console.log(`room id = ${options.roomId}`);
+}
 var danmuSocket = DanmuConnection.connect(options);
 //danmuSocket.on('chatmsg', function() {});
 

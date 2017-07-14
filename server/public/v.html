@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style type="text/css">
+
+  </style>
+</head>
+<body>
+  <div id="videoWrapper">
+
+  </div>
+
+  <script type="text/javascript">
+    var roomId = "2288749";
+    var TOKEN = "tt=24973469&ver=2017062311&rate=2&sign=ce720cddac85fd3750089d2ea2551339&cdn=tct&did=9C9B29EE0C9EA895F06C92FDADC800ED";
+
+    function enableCORS() {
+      var xmlhttp = new XMLHttpRequest();
+      //var path = "/cors";
+      var sUrl = "http://www.douyu.com/lapi/live/getPlay/" + roomId;
+      var path = sUrl;
+      xmlhttp.onreadystatechange = function(){
+        if (this.readyState==4)
+        {
+          // this.status==200
+          //console.log(this);
+          //console.log(arguments);
+          console.log(this.responseText);
+
+          //document.getElementById("response").innerHTML = s;
+        }
+      };
+      
+      xmlhttp.open("POST", path, true);
+      //xmlhttp.setRequestHeader("Content-type","application/json");
+      xmlhttp.send(TOKEN);
+    }
+
+    //enableCORS();
+
+    function iframeReq(cbData) {
+      var newFrame = document.createElement("iframe");
+      var sUrl = "http://www.douyu.com/lapi/live/getPlay/" + 2089340;
+      newFrame.src = sUrl;
+      //newFrame.frameBorder = 0;
+      //newFrame.width = "400px";  
+      //newFrame.height = "400px";  
+      //newFrame.scrolling = "no";  
+      document.body.appendChild(newFrame);
+    }
+    //iframeReq();
+
+
+    function crossDomainPost(sData) {
+      var sUrl = "http://www.douyu.com/lapi/live/getPlay/" + roomId;
+
+      // Add the iframe with a unique name
+      var iframe = document.createElement("iframe");
+      var uniqueString = "CHANGE_THIS_TO_SOME_UNIQUE_STRING";
+      document.body.appendChild(iframe);
+      //iframe.style.display = "none";
+      iframe.contentWindow.name = uniqueString;
+      iframe.onload = function(){
+        alert(1);
+        console.log(arguments);
+      };
+      var g = {a: 1, b: 2};
+      window.g = g;
+      iframe.contentWindow.g = g;
+
+      // construct a form with hidden inputs, targeting the iframe
+      var form = document.createElement("form");
+      form.target = uniqueString;
+      form.action = sUrl;
+      form.method = "POST";
+
+      // repeat for each parameter
+      var oParams = parse(TOKEN);
+      for (var key in oParams) {
+        var input = document.createElement("input");
+        input.type = "text";
+        input.name = key;
+        input.value = oParams[key];
+        form.appendChild(input);
+      }
+      // var input = document.createElement("input");
+      // input.type = "text";
+      // input.name = "INSERT_YOUR_PARAMETER_NAME_HERE";
+      // input.value = "INSERT_YOUR_PARAMETER_VALUE_HERE";
+      // form.appendChild(input);
+
+      document.body.appendChild(form);
+
+
+      form.submit();
+
+    }
+
+    function parse(s) {
+    //"tt=24973358&ver=2017062311&rate=2&sign=6e1e4a4190718b0ce6e92da710b97d20&cdn=tct&did=9C9B29EE0C9EA895F06C92FDADC800ED";
+      var params = {};
+      s.split('&').forEach(function(token) {
+        var arr = token.split('=');
+        params[arr[0]] = arr[1];
+      });
+      return params;
+    }
+    crossDomainPost();
+
+  </script>
+</body>
+</html>
