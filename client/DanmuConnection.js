@@ -4,6 +4,7 @@ const util = require('util');
 const EventEmitter = require('events');
 const model = require('./danmu/model');
 const DanmuPayload = require('./DanmuPayload');
+const DateHelper = require('../common/DateHelper');
 
 const DANMU_ADDRESS = "danmu.douyutv.com";
 const DANMU_PORT = 8602;
@@ -25,6 +26,9 @@ function DanmuSocket(socket, roomId, groupId) {
     this._roomId = roomId;
     this._groupId = groupId != undefined ? groupId : DEFAULT_GROUP_ID;
     this._eventEmitter = new EventEmitter();
+    this.getEventEmitter = function() {
+        return this._eventEmitter;
+    };
     this._heartbeat = new DanmuHeartbeat(this);
     this._danmuPayload = new DanmuPayload();
 
@@ -91,7 +95,8 @@ DanmuSocket.prototype._translateMessage = function(oMsg) {
         break;
 
     case 'chatmsg':
-        console.log(`${oMsg.nn}: ${oMsg.txt}`);
+        var sNow = DateHelper.format(new Date());
+        console.log(`[${sNow}] ${oMsg.nn}: ${oMsg.txt}`);
         break;
 
     case 'onlinegift':

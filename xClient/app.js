@@ -1,13 +1,14 @@
 const url = require('url');
 const http = require('http');
+const https = require('https');
 const assert = require('assert');
 const Player = require('./player');
 const child_process = require('child_process');
 const fs = require('fs');
 
-var ROOM_ID = "156277"; //2089340,490977
+var ROOM_ID = "71017"; //2089340,490977
 var TOKEN = 
-    "cptl=0001&ver=2017070701&rate=2&tt=24993206&cdn=tct&sign=37f786964fc951af335c0efe3f7bb3c6&did=9C9B29EE0C9EA895F06C92FDADC800ED";
+    "cdn=ws&rate=2&sign=70c7d40f07d5c7d7d4264168ebab7ab2&ver=2017091901&tt=25098527&cptl=0002&did=9C9B29EE0C9EA895F06C92FDADC800ED";
 
 function step1(cbNext) {
     var sUrl = "https://www.douyu.com/swf_api/room/67373?cdn=ws&nofan=yes&_t=24850898&sign=9c0251729e77f02c31f0dfa06ce5607d";
@@ -39,7 +40,7 @@ function step1(cbNext) {
 }
 
 function step2(cbNext, cbNext2) {
-    var sUrl = "https://www.douyu.com/lapi/live/getPlay/" + ROOM_ID;
+    var sUrl = "http://www.douyu.com/lapi/live/getPlay/" + ROOM_ID;
 
     var oUrl = url.parse(sUrl);
 
@@ -48,15 +49,20 @@ function step2(cbNext, cbNext2) {
         //port: 80,
         path: oUrl.path,
         method: 'POST',
-        headers: {}
+        headers: { 
+            "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36",
+            "Content-Type": "application/x-www-form-urlencoded" }
     };
 
     var sBody = TOKEN;
+    oOption.headers["Content-Length"] = sBody.length;
+    console.log(`get video url from: ${sUrl}`);
+    console.log(oOption);
     var oReq = http.request(oOption, function(res){
-        if (res.statusCode != 200) {
-            throw "error! status code = " + res.statusCode;
-            //return;
-        }
+        // if (res.statusCode != 200) {
+        //     throw "error! status code = " + res.statusCode;
+        //     //return;
+        // }
 
         let rawData = '';
         res.on('data', function(chunk){
@@ -64,6 +70,10 @@ function step2(cbNext, cbNext2) {
         });
         res.on('end', function(){
             //console.log(rawData);
+            if (res.statusCode != 200) {
+                console.log(rawData.toString());
+                throw "error! status code = " + res.statusCode;
+            }
             cbNext(rawData, cbNext2);
         });
     });
