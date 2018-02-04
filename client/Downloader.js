@@ -119,6 +119,52 @@ Downloader.prototype.runWriteStream = function(sUrl, oWriteStream, fComplete) {
     }).end(); // return <http.ClientRequest>
 };
 
+Downloader.prototype.runWriteBuffer = function(sUrl, fComplete) {
+    var oUrl = url.parse(sUrl);
+    var oOption = {
+        hostname: oUrl.hostname,
+        //port: 80,
+        path: oUrl.path,
+        method: 'GET',
+        headers: {}
+    };
+
+    var oHttp;
+    if ("http:" == oUrl.protocol) {
+        oHttp = http;
+    } else if ("https:" == oUrl.protocol) {
+        oHttp = https;
+    } else {
+        throw "protocol not supported";
+    }
+    
+    oHttp.request(oOption, function(res){
+        //assert.ok(res instanceof http.IncomingMessage, "IncomingMessage");
+
+        let nSize = 0;
+        let nTotalSize = 0;
+        let aBuffer = [];
+
+        res.on('data', function(chunk){
+            nSize += chunk.length;
+            nTotalSize += chunk.length;
+            if (nSize > 1024 * 1024) {
+                // console.log(".");
+                //console.log(nTotalSize);
+                nSize -= 1024 * 1024;
+            }
+            aBuffer.push(chunk);
+        });
+
+        res.on('end', function(){
+            if (typeof fComplete == 'function') {
+                fComplete(Buffer.concat(aBuffer));
+            }
+        });
+
+    }).end(); // return <http.ClientRequest>
+};
+
 Downloader.prototype.runPipeStream = function(sUrl, oWriteStream) {
     var oUrl = url.parse(sUrl);
     var oOption = {
@@ -157,6 +203,11 @@ Downloader.run = function(sUrl, sFileName, fOnComplete) {
 Downloader.runWriteStream = function(sUrl, oWriteStream, fOnComplete) {
     var d = new Downloader();
     d.runWriteStream(sUrl, oWriteStream, fOnComplete);
+};
+
+Downloader.runWriteBuffer = function(sUrl, fOnComplete) {
+    var d = new Downloader();
+    d.runWriteBuffer(sUrl, fOnComplete);
 };
 
 module.exports = Downloader;
