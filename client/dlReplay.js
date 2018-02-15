@@ -3,7 +3,7 @@ const fs = require('fs');
 
 // playlist.m3u8
 
-var sRawUrl = "http://videows1.douyucdn.cn/live/high_643129820171029200352-upload-2fcd/playlist.m3u8?k=afa224edc45f292a441bdf80f528ac5b&t=5a75cc7e&u=70806189&ct=web&vid=1793798&d=9C9B29EE0C9EA895F06C92FDADC800ED";
+var sRawUrl = "http://videows1.douyucdn.cn/live/high_643129820171216203409-upload-b9ef/playlist.m3u8?k=c7d159667ea44d709f73375e20b85176&t=5a85577a&u=70806189&ct=web&vid=2222128&d=9C9B29EE0C9EA895F06C92FDADC800ED";
 var sBaseUrl = "";
 var sPlayList = "";
 var sBasePath = "E:\\temp\\dyReplay\\";

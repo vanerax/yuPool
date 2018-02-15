@@ -107,14 +107,16 @@ Downloader.prototype.runWriteStream = function(sUrl, oWriteStream, fComplete) {
         });
 
         res.on('end', function(){
+            oWriteStream.removeListener('drain', fOnWriteStreamDrain);
             if (typeof fComplete == 'function') {
                 fComplete();
             }
         });
-
-        oWriteStream.on('drain', function() {
+        
+        var fOnWriteStreamDrain = function() {
             res.resume();
-        });
+        };
+        oWriteStream.on('drain', fOnWriteStreamDrain);
 
     }).end(); // return <http.ClientRequest>
 };
