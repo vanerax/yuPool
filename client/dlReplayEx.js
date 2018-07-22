@@ -2,8 +2,8 @@ const Downloader = require('./Downloader');
 const fs = require('fs');
 
 // playlist.m3u8
-
-var sRawUrl = "http://videows1.douyucdn.cn/live/high_643129820180121205642-upload-0ba3/playlist.m3u8?k=ad29f7a0b0b854143f210bb40f29828c&t=5b54869d&u=70806189&ct=web&vid=2617660&pt=1&cdn=ws&d=2d1149d79179e4c521e1407370061501";
+const MAX_DOWNLOAD_THREAD = 4;
+var sRawUrl = "http://videows1.douyucdn.cn/live/high_643129820180128201438-upload-6127/playlist.m3u8?k=8036e07e99c37b3b077f9567415ee82d&t=5b54a5f6&u=70806189&ct=web&vid=2711872&pt=1&cdn=ws&d=2d1149d79179e4c521e1407370061501";
 var sBaseUrl = "";
 var sPlayList = "";
 var sBasePath = "E:\\temp\\dyReplay\\";
@@ -47,12 +47,12 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 	nMaxThread = nMaxThread || 1;
 
 	function run() {
-		console.log('start <run> ' + sIdx);
+		console.log('start <run> ' + sIdx + '. appending to [' + aBufferIdx + "]");
 		var sCurIdx = sIdx;
 		if (sCurIdx >= aUrlList.length) {
 			if (aBufferIdx.length > 0) {
 				// havs remaining tasks
-				console.log('wait for renaming jobs');
+				console.log('wait for remaining jobs');
 			} else {
 				// all done
 				console.log('all done');
@@ -72,7 +72,7 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 		Downloader.runWriteBuffer(sUrl, (bfData) => {
 			oBufferPool[sCurIdx] = bfData;
 
-			console.log('task ' + sCurIdx + ' ok');
+			console.log('job ' + sCurIdx + ' ok');
 			tryWriteStream();
 			runMost();
 			// // check count
@@ -95,10 +95,8 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 			// } else {
 			// 	// do nothing
 			// }
-
 		});
 
-		console.log(sIdx + " in [" + aBufferIdx + "]");
 		sIdx++;
 	}
 
@@ -116,14 +114,15 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 	}
 
 	function runMost() {
-		if (aBufferIdx.length === nMaxThread) {
-			console.log('thread limited');
-		}
+		// if (aBufferIdx.length === nMaxThread) {
+		// 	console.log('thread limited');
+		// }
 
 		// while (aBufferIdx.length < nMaxThread && sIdx < aUrlList.length) {
 		// 	run();
 		// }
-		for (var i=0; i< nMaxThread-aBufferIdx.length; i++) {
+		var n = nMaxThread - aBufferIdx.length;
+		for (var i=0; i< n; i++) {
 			run();
 		}
 	}
@@ -131,68 +130,14 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 	runMost();
 }
 
-function onPlaylistComplete() {
-	var sPayload = fs.readFileSync(sBasePath + sFileName, 'utf8');
-	var aLine = sPayload.split('\n');
-	var lineIdx = 0;
-	var videoIdx = 0;
-
-
-	verifyPlayList(aLine);
-	aLine = aLine.filter(function(line){
-		return line.length > 0 && line[0] != '#';
-	});
-
-	function getVideo() {
-
-		if (lineIdx < aLine.length) {
-			var line = aLine[lineIdx];
-			lineIdx++;
-			console.log(line);
-
-			//if (line.length > 0 && line[0] != '#') {
-				var sUrl = sBaseUrl + line;
-				var sFileName = sBasePath + videoIdx.toString() + ".ts";
-				console.log(sFileName);
-				console.log('-----------');
-				//Downloader.run(sUrl, sFileName, onVideoComplete);
-				Downloader.runWriteStream(sUrl, writeStream, onVideoComplete);
-				
-				videoIdx++;
-	
-			//} else {
-			//	setTimeout(getVideo, 0);
-			//}
-			
-
-		} else {
-			// finished
-			writeStream.end();
-		}
-	} 
-
-	function onVideoComplete(){
-		getVideo();
-	}
-
-
-	
-	var writeStream = fs.createWriteStream(output, { highWaterMark: 1024 * 1024 });
-	getVideo();
-}
-
-
-
 if (sRawUrl && sRawUrl.length > 0) {
 	parseUrl();
 }
+
 getPlayList(sBaseUrl + sPlayList, function(aList){
 	//console.log(aList);
-	var nMaxThread = 3;
 	var oWriteStream = fs.createWriteStream(output, { highWaterMark: 1024 * 1024 });
 	downloadAll(aList, oWriteStream, () => {
 		oWriteStream.end();
-	}, nMaxThread);
+	}, MAX_DOWNLOAD_THREAD);
 });
-
-
