@@ -3,7 +3,7 @@ const fs = require('fs');
 
 // playlist.m3u8
 
-var sRawUrl = "http://videows1.douyucdn.cn/live/high_643129820171029194400-upload-0225/playlist.m3u8?k=528ad9bd49fe2563a19107961b1ddc02&t=5a75f86d&u=70806189&ct=web&vid=1793645&d=9C9B29EE0C9EA895F06C92FDADC800ED";
+var sRawUrl = "http://videows1.douyucdn.cn/live/high_643129820180121205642-upload-0ba3/playlist.m3u8?k=ad29f7a0b0b854143f210bb40f29828c&t=5b54869d&u=70806189&ct=web&vid=2617660&pt=1&cdn=ws&d=2d1149d79179e4c521e1407370061501";
 var sBaseUrl = "";
 var sPlayList = "";
 var sBasePath = "E:\\temp\\dyReplay\\";
@@ -98,8 +98,7 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 
 		});
 
-		console.log(sIdx);
-		console.log(aBufferIdx);
+		console.log(sIdx + " in [" + aBufferIdx + "]");
 		sIdx++;
 	}
 
@@ -121,7 +120,10 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 			console.log('thread limited');
 		}
 
-		while (aBufferIdx.length < nMaxThread) {
+		// while (aBufferIdx.length < nMaxThread && sIdx < aUrlList.length) {
+		// 	run();
+		// }
+		for (var i=0; i< nMaxThread-aBufferIdx.length; i++) {
 			run();
 		}
 	}

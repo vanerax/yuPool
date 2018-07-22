@@ -150,5 +150,5 @@ if (process.argv.length >= 4) {
 //step1(step2, getUrlFromStep2);
 step2(getUrlFromStep2, play);
 //step2(getUrlFromStep2, function(sUrl){ saveToFile(sUrl); });
-step2(getUrlFromStep2, wget);
+//step2(getUrlFromStep2, wget);
 
