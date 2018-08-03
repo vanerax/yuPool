@@ -3,7 +3,7 @@ const fs = require('fs');
 
 // playlist.m3u8
 const MAX_DOWNLOAD_THREAD = 4;
-var sRawUrl = "http://videows1.douyucdn.cn/live/high_643129820180225200904-upload-25b2/playlist.m3u8?k=681f1726d3fdd0376cb64681a031cefd&t=5b58ad23&u=70806189&ct=web&vid=3055027&pt=1&cdn=ws&d=2d1149d79179e4c521e1407370061501";
+var sRawUrl = "http://videows1.douyucdn.cn/live/high_643129820180425203333-upload-ece6/playlist.m3u8?k=1456358d3ba73e8272de0bb43a54b8f7&t=5b647f6f&u=70806189&ct=web&vid=3870837&pt=1&cdn=ws&d=2d1149d79179e4c521e1407370061501";
 var sBaseUrl = "";
 var sPlayList = "";
 var sBasePath = "E:\\temp\\dyReplay\\";
@@ -48,7 +48,7 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 	nMaxThread = nMaxThread || 1;
 
 	function run() {
-		console.log('start job ' + sIdx + '. appending to [' + aJobIdx + "]");
+		// console.log('start job ' + sIdx + '. appending to [' + aJobIdx + "]");
 		var sCurIdx = sIdx;
 		if (sCurIdx >= aUrlList.length) {
 			if (aJobIdx.length > 0) {
@@ -69,13 +69,14 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 
 		aJobIdx.push(sCurIdx);
 		aBufferIdx.push(sCurIdx);
+		inspectQueue(aJobIdx, aBufferIdx);
 
 		var sUrl = getBaseUrl() + aUrlList[sCurIdx];
 		Downloader.runWriteBuffer(sUrl, (bfData) => {
 			oBufferPool[sCurIdx] = bfData;
 			aJobIdx.splice(aJobIdx.indexOf(sCurIdx), 1);
 
-			console.log('job ' + sCurIdx + ' ok');
+			// console.log('job ' + sCurIdx + ' ok');
 			tryWriteStream();
 			runMost();
 			// // check count
@@ -104,7 +105,7 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 	}
 
 	function tryWriteStream() {
-		console.log(">> buffer [" + aBufferIdx + "]");
+		// console.log(">> buffer [" + aBufferIdx + "]");
 		var ok = true;
 		while (aBufferIdx.length > 0 && ok) {
 			var nNextIdx = aBufferIdx[0];
@@ -117,7 +118,7 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 			}
 		}
 		if (aBufferIdx.length > 0 && !ok) {
-			console.log('>> wait for drain!!!!!!!!!!!!!!!!!!!!!!!!!');
+			//console.log('>> wait for drain!!!!!!!!!!!!!!!!!!!!!!!!!');
 			oWriteStream.once('drain', tryWriteStream);
 		}
 		
@@ -138,6 +139,21 @@ function downloadAll(aUrlList, oWriteStream, fDone, nMaxThread) {
 	}
 
 	runMost();
+}
+
+function inspectQueue(aJobIdx, aBufferIdx) {
+	var aOutput = [];
+
+	for (var i=0;i<aBufferIdx.length;i++) {
+		var nIdx = aBufferIdx[i];
+		var sPrefix = "";
+		if (aJobIdx.indexOf(nIdx) > -1) {
+			sPrefix = "*";
+		}
+		aOutput.push(sPrefix + nIdx);
+	}
+
+	console.log("[ ", aOutput.join(", ") + " ]");
 }
 
 if (sRawUrl && sRawUrl.length > 0) {
